@@ -1,6 +1,7 @@
 #!/opt/homebrew/Cellar/flatcam-evo/8.9.95/libexec/bin/python3
 import sys
 import os
+import ctypes
 import traceback
 from datetime import datetime
 
@@ -19,6 +20,27 @@ from multiprocessing import freeze_support
 
 MIN_VERSION_MAJOR = 3
 MIN_VERSION_MINOR = 6
+
+
+def _disable_qt_accessibility():
+    """Disable Qt's macOS accessibility bridge for this legacy QTreeView."""
+    if sys.platform != 'darwin':
+        return
+
+    try:
+        qt_gui_path = os.path.join(
+            os.path.dirname(QtGui.__file__),
+            'Qt6', 'lib', 'QtGui.framework', 'Versions', 'A', 'QtGui'
+        )
+        qt_gui = ctypes.CDLL(qt_gui_path)
+        set_active = qt_gui._ZN11QAccessible9setActiveEb
+        set_active.argtypes = [ctypes.c_bool]
+        set_active(False)
+    except (AttributeError, OSError):
+        pass
+
+
+_disable_qt_accessibility()
 
 
 def debug_trace():
