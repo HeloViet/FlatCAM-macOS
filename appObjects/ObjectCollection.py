@@ -379,6 +379,21 @@ class ObjectCollection(QtCore.QAbstractItemModel):
         self.view.activated.connect(self.on_row_activated)
         self.item_selected.connect(self.on_row_selected)
 
+        # Expand the project groups after the initial UI/model setup has
+        # returned to Qt's event loop. Expanding during model insertion can
+        # trigger a macOS Qt accessibility crash.
+        self.schedule_expand_all_groups()
+
+    def expand_all_groups(self):
+        """Expand every project group in the tree view."""
+        for group in self.group_items.values():
+            group_index = self.index(group.row(), 0, QtCore.QModelIndex())
+            self.view.setExpanded(group_index, True)
+
+    def schedule_expand_all_groups(self):
+        """Expand groups after Qt finishes the current model update."""
+        QtCore.QTimer.singleShot(0, self.expand_all_groups)
+
     def promise(self, obj_name):
         self.app.log.debug("Object %s has been promised." % obj_name)
         self.promises.add(obj_name)
@@ -655,6 +670,7 @@ class ObjectCollection(QtCore.QAbstractItemModel):
         # accessibility bridge can crash inside QTreeView::expand() while
         # the first Excellon object is being inserted.  The user can still
         # expand the group manually when needed.
+        self.schedule_expand_all_groups()
 
         self.app.should_we_save = True
 
