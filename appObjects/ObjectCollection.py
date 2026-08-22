@@ -392,7 +392,9 @@ class ObjectCollection(QtCore.QAbstractItemModel):
 
     def schedule_expand_all_groups(self):
         """Expand groups after Qt finishes the current model update."""
-        QtCore.QTimer.singleShot(0, self.expand_all_groups)
+        # Give the initial widget/model setup time to settle before touching
+        # QTreeView. This avoids racing the macOS Qt accessibility bridge.
+        QtCore.QTimer.singleShot(500, self.expand_all_groups)
 
     def promise(self, obj_name):
         self.app.log.debug("Object %s has been promised." % obj_name)
@@ -666,11 +668,9 @@ class ObjectCollection(QtCore.QAbstractItemModel):
             # Required after appending (Qt MVC)
             self.endInsertRows()
 
-        # Do not expand the group automatically on macOS.  Qt's Cocoa
-        # accessibility bridge can crash inside QTreeView::expand() while
-        # the first Excellon object is being inserted.  The user can still
-        # expand the group manually when needed.
-        self.schedule_expand_all_groups()
+        # The groups are opened once after initial UI setup. Do not expand
+        # here: drag-and-drop inserts objects while Qt is updating the model,
+        # and expanding at this point can crash the macOS accessibility bridge.
 
         self.app.should_we_save = True
 
