@@ -386,10 +386,20 @@ class ObjectCollection(QtCore.QAbstractItemModel):
         # for manual expansion through the normal tree controls.
 
     def expand_all_groups(self):
-        """Expand every project group in the tree view."""
-        for group in self.group_items.values():
-            group_index = self.index(group.row(), 0, QtCore.QModelIndex())
-            self.view.setExpanded(group_index, True)
+        """Expand non-empty project groups one at a time."""
+        self._pending_expand_groups = [
+            group for group in self.group_items.values() if group.child_count() > 0
+        ]
+        self._expand_next_group()
+
+    def _expand_next_group(self):
+        if not self._pending_expand_groups:
+            return
+
+        group = self._pending_expand_groups.pop(0)
+        group_index = self.index(group.row(), 0, QtCore.QModelIndex())
+        self.view.setExpanded(group_index, True)
+        QtCore.QTimer.singleShot(100, self._expand_next_group)
 
     def schedule_expand_all_groups(self):
         """Expand groups after Qt finishes the current model update."""
