@@ -31,6 +31,12 @@ class TreeExpansionTests(unittest.TestCase):
         self.assertIn("expand_tree_button = FCButton", source)
         self.assertIn("expand_tree_button.clicked.connect(self.collection.expand_all_groups)", source)
 
+    def test_expand_all_is_staggered_and_skips_empty_groups(self):
+        source = SOURCE.read_text()
+        self.assertIn("group.child_count() > 0", source)
+        self.assertIn("_expand_next_group", source)
+        self.assertIn("singleShot(100", source)
+
     def test_tree_items_are_data_objects_not_nested_qt_views(self):
         class_node = _tree_item_class()
         bases = [base.id for base in class_node.bases if isinstance(base, ast.Name)]
