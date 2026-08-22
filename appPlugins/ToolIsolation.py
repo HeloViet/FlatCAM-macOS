@@ -1700,6 +1700,8 @@ class ToolIsolation(Gerber, AppTool):
             return
 
         try:
+            # The shortcut can be used before the Isolation plugin tab was opened.
+            self.set_tool_ui()
             self._quick_workflow = True
             self.grb_obj = selected_obj
             self.obj_name = selected_obj.obj_options['name']
