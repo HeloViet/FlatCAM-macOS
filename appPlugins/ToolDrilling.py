@@ -473,6 +473,10 @@ class ToolDrilling(Excellon, AppTool):
         else:
             self.default_data.update(self.app.options)
 
+        if self.default_data.get('tools_drill_spindlespeed', 0) in (None, 0):
+            self.default_data['tools_drill_spindlespeed'] = 500
+            self.app.options['tools_drill_spindlespeed'] = 500
+
         self.default_data['name'] = outname + '_drill'
 
         self.first_click = False
@@ -495,6 +499,11 @@ class ToolDrilling(Excellon, AppTool):
         except AttributeError:
             # no object loaded
             pass
+
+        for tooluid_value in self.excellon_tools.values():
+            tool_data = tooluid_value.setdefault('data', {})
+            if tool_data.get('tools_drill_spindlespeed', 0) in (None, 0):
+                tool_data['tools_drill_spindlespeed'] = 500
         self.build_tool_ui()
 
         # #############################################################################################################
