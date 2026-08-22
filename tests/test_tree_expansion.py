@@ -12,7 +12,27 @@ def _object_collection_class():
                 and node.name == "ObjectCollection")
 
 
+def _event_sensitive_list_view_class():
+    tree = ast.parse(SOURCE.read_text())
+    return next(node for node in tree.body if isinstance(node, ast.ClassDef)
+                and node.name == "EventSensitiveListView")
+
+
 class TreeExpansionTests(unittest.TestCase):
+    def test_project_tree_does_not_handle_external_file_drops(self):
+        class_node = _event_sensitive_list_view_class()
+        init_method = next(node for node in class_node.body
+                           if isinstance(node, ast.FunctionDef)
+                           and node.name == "__init__")
+        disabled_drop_calls = [node for node in ast.walk(init_method)
+                               if isinstance(node, ast.Call)
+                               and isinstance(node.func, ast.Attribute)
+                               and node.func.attr == "setAcceptDrops"
+                               and len(node.args) == 1
+                               and isinstance(node.args[0], ast.Constant)
+                               and node.args[0].value is False]
+        self.assertTrue(disabled_drop_calls)
+
     def test_object_collection_schedules_tree_expansion_after_insertion(self):
         class_node = _object_collection_class()
         methods = {node.name: node for node in class_node.body
