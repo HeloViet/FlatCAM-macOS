@@ -14,7 +14,7 @@ from PyQt6 import QtCore, QtWidgets
 
 from appEditors.appTextEditor import AppTextEditor
 from appObjects.AppObjectTemplate import FlatCAMObj, ObjectDeleted
-from appGUI.GUIElements import FCFileSaveDialog, FCCheckBox
+from appGUI.GUIElements import FCCheckBox
 from appGUI.ObjectUI import CNCObjectUI
 from camlib import CNCjob
 
@@ -726,6 +726,15 @@ class CNCJobObject(FlatCAMObj, CNCjob):
             filename, _f = FCFileSaveDialog.get_saved_filename(
                 caption=_("Export Code ..."),
                 ext_filter=_filter_)
+
+        if filename:
+            base, extension = os.path.splitext(str(filename))
+            candidate = str(filename)
+            suffix = 1
+            while os.path.exists(candidate):
+                candidate = '%s_%d%s' % (base, suffix, extension)
+                suffix += 1
+            filename = candidate
 
         self.export_gcode_handler(filename, is_gcode=save_gcode)
 
