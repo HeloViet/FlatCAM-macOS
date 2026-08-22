@@ -58,7 +58,7 @@ class TreeExpansionTests(unittest.TestCase):
                            and node.func.attr == "schedule_expand_all_groups"]
         self.assertFalse(scheduled_calls)
 
-    def test_initial_tree_expansion_is_not_scheduled_during_startup(self):
+    def test_initial_tree_expansion_is_scheduled_after_startup(self):
         class_node = _object_collection_class()
         methods = {node.name: node for node in class_node.body
                    if isinstance(node, ast.FunctionDef)}
@@ -66,11 +66,19 @@ class TreeExpansionTests(unittest.TestCase):
         init_method = next(node for node in class_node.body
                            if isinstance(node, ast.FunctionDef)
                            and node.name == "__init__")
-        single_shot_calls = [node for node in ast.walk(init_method)
+        schedule_calls = [node for node in ast.walk(init_method)
+                          if isinstance(node, ast.Call)
+                          and isinstance(node.func, ast.Attribute)
+                          and node.func.attr == "schedule_expand_all_groups"]
+        self.assertEqual(len(schedule_calls), 1)
+
+        schedule_method = methods["schedule_expand_all_groups"]
+        single_shot_calls = [node for node in ast.walk(schedule_method)
                              if isinstance(node, ast.Call)
                              and isinstance(node.func, ast.Attribute)
                              and node.func.attr == "singleShot"]
-        self.assertFalse(single_shot_calls)
+        self.assertEqual(len(single_shot_calls), 1)
+        self.assertGreater(single_shot_calls[0].args[0].value, 0)
 
 
 if __name__ == "__main__":

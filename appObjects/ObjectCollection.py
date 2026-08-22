@@ -380,10 +380,10 @@ class ObjectCollection(QtCore.QAbstractItemModel):
         self.view.activated.connect(self.on_row_activated)
         self.item_selected.connect(self.on_row_selected)
 
-        # Do not expand the project groups automatically during startup.
-        # On macOS, expanding the QTreeView while a file is being inserted
-        # can trigger a Qt accessibility crash. The groups remain available
-        # for manual expansion through the normal tree controls.
+        # Expand the project groups after the initial UI/model setup has
+        # returned to Qt's event loop. The macOS accessibility bridge is
+        # disabled by the launcher before the application is created.
+        self.schedule_expand_all_groups()
 
     def expand_all_groups(self):
         """Expand every project group in the tree view."""
