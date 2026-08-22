@@ -14,6 +14,10 @@ def _method(source, name):
 
 
 class MacOSSaveDialogTests(unittest.TestCase):
+    def test_cnc_job_keeps_save_dialog_import(self):
+        source = CNC_SOURCE.read_text()
+        self.assertIn("FCFileSaveDialog", source.split("\n", 40)[0:40].__str__())
+
     def test_save_dialog_uses_osascript_instead_of_qt_file_dialog(self):
         method = _method(GUI_SOURCE, "get_saved_filename")
         qt_dialog_calls = [node for node in ast.walk(method)
