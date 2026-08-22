@@ -15,6 +15,7 @@ class QuickIsolationDxfTests(unittest.TestCase):
     def test_quick_workflow_requires_selected_gerber_and_uses_point_zero_one_tool(self):
         self.assertIn("def quick_isolation_dxf", ISOLATION_SOURCE)
         self.assertIn("No Gerber object is selected", ISOLATION_SOURCE)
+        self.assertIn("getattr(selected_obj, 'kind', None)", ISOLATION_SOURCE)
         self.assertIn("0.01", ISOLATION_SOURCE)
         self.assertIn("on_iso_button_click", ISOLATION_SOURCE)
 

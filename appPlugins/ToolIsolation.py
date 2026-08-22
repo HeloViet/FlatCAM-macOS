@@ -1695,23 +1695,29 @@ class ToolIsolation(Gerber, AppTool):
     def quick_isolation_dxf(self):
         """Run a one-tool isolation and export the resulting geometry as DXF."""
         selected_obj = self.app.collection.get_active()
-        if selected_obj is None or selected_obj.kind != 'gerber':
+        if getattr(selected_obj, 'kind', None) != 'gerber':
             self.app.inform.emit('[WARNING_NOTCL] %s' % _('No Gerber object is selected.'))
             return
 
-        self._quick_workflow = True
-        self.grb_obj = selected_obj
-        self.obj_name = selected_obj.obj_options['name']
+        try:
+            self._quick_workflow = True
+            self.grb_obj = selected_obj
+            self.obj_name = selected_obj.obj_options['name']
 
-        self.ui.object_combo.set_value(self.obj_name)
-        self.ui.select_combo.set_value(0)
-        self.ui.valid_cb.set_value(False)
+            self.ui.object_combo.set_value(self.obj_name)
+            self.ui.select_combo.set_value(0)
+            self.ui.valid_cb.set_value(False)
 
-        # Use exactly one known tool for this shortcut, without changing saved defaults.
-        self.iso_tools.clear()
-        self.on_tool_default_add(dia=0.01, muted=True)
-        self.ui.tools_table.selectAll()
-        self.on_iso_button_click()
+            # Use exactly one known tool for this shortcut, without changing saved defaults.
+            self.iso_tools.clear()
+            self.on_tool_default_add(dia=0.01, muted=True)
+            self.ui.tools_table.selectAll()
+            self.app.inform.emit('[selected] %s' % _('Quick Isolation started.'))
+            self.on_iso_button_click()
+        except Exception as err:
+            self._quick_workflow = False
+            self.app.log.exception('Quick Isolation DXF failed to start.')
+            self.app.inform.emit('[ERROR_NOTCL] %s: %s' % (_('Quick Isolation DXF failed'), str(err)))
 
     def _quick_geometry_created(self, geometry_name):
         if self._quick_workflow:
