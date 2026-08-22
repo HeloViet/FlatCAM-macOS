@@ -715,8 +715,17 @@ class CNCJobObject(FlatCAMObj, CNCjob):
             save_gcode = True
             _filter_ = self.app.options['cncjob_save_filters']
 
+        timestamp = dt.now().strftime('%Y%m%d_%H%M%S')
+        base_name = os.path.splitext(str(name))[0]
+        default_extension = '.nc'
+        if not save_gcode:
+            extension_match = re.search(r'\*\.([A-Za-z0-9]+)', _filter_)
+            if extension_match:
+                default_extension = '.' + extension_match.group(1)
+        timestamped_name = '%s_%s%s' % (base_name, timestamp, default_extension)
+
         try:
-            dir_file_to_save = self.app.get_last_save_folder() + '/' + str(name)
+            dir_file_to_save = self.app.get_last_save_folder() + '/' + timestamped_name
             filename, _f = FCFileSaveDialog.get_saved_filename(
                 caption=_("Export Code ..."),
                 directory=dir_file_to_save,
