@@ -5570,6 +5570,56 @@ class FCTextAreaLineNumber(QtWidgets.QFrame):
         self.edit.setLineWrapMode(mode)
 
 
+class FCFileOpenDialog:
+    """Open-file chooser with a native macOS implementation."""
+
+    @staticmethod
+    def getOpenFileNames(parent=None, caption='', directory='', filter='', initialFilter=''):
+        if sys.platform == 'darwin':
+            def applescript_string(value):
+                escaped = str(value).replace('\\', '\\\\').replace('"', '\\"')
+                return '"%s"' % escaped
+
+            location = str(directory or '')
+            if location and not os.path.isdir(location):
+                location = os.path.dirname(location)
+
+            location_clause = ''
+            if location:
+                location_clause = ' default location POSIX file %s' % applescript_string(location)
+
+            script = (
+                'set chosenFiles to choose file with prompt %s%s with multiple selections allowed\n'
+                'set output to ""\n'
+                'repeat with chosenFile in chosenFiles\n'
+                '    set output to output & (POSIX path of chosenFile) & linefeed\n'
+                'end repeat\n'
+                'return output'
+            ) % (applescript_string(caption), location_clause)
+            result = subprocess.run(
+                ['osascript', '-e', script],
+                capture_output=True,
+                text=True,
+                check=False
+            )
+            if result.returncode != 0:
+                return [], filter
+
+            filenames = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+            return filenames, filter
+
+        return QtWidgets.QFileDialog.getOpenFileNames(
+            parent=parent, caption=caption, directory=directory,
+            filter=filter, initialFilter=initialFilter)
+
+    @staticmethod
+    def getOpenFileName(parent=None, caption='', directory='', filter='', initialFilter=''):
+        filenames, selected_filter = FCFileOpenDialog.getOpenFileNames(
+            parent=parent, caption=caption, directory=directory,
+            filter=filter, initialFilter=initialFilter)
+        return (filenames[0] if filenames else ''), selected_filter
+
+
 class FCFileSaveDialog(QtWidgets.QFileDialog):
 
     def __init__(self, *args):

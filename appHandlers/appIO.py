@@ -6,7 +6,7 @@ from appEditors.appExcEditor import AppExcEditor
 from appEditors.appGeoEditor import AppGeoEditor
 from appEditors.appGerberEditor import AppGerberEditor
 
-from appGUI.GUIElements import FCFileSaveDialog, FCMessageBox
+from appGUI.GUIElements import FCFileOpenDialog, FCFileSaveDialog, FCMessageBox
 from camlib import to_dict, dict2obj, ET, ParseError
 from appParsers.ParseHPGL2 import HPGL2
 
@@ -101,12 +101,12 @@ class appIO(QtCore.QObject):
 
         if name is None:
             try:
-                filenames, _f = QtWidgets.QFileDialog.getOpenFileNames(caption=_("Open Gerber"),
+                filenames, _f = FCFileOpenDialog.getOpenFileNames(caption=_("Open Gerber"),
                                                                        directory=self.app.get_last_folder(),
                                                                        filter=_filter_,
                                                                        initialFilter=self.app.last_op_gerber_filter)
             except TypeError:
-                filenames, _f = QtWidgets.QFileDialog.getOpenFileNames(caption=_("Open Gerber"), filter=_filter_)
+                filenames, _f = FCFileOpenDialog.getOpenFileNames(caption=_("Open Gerber"), filter=_filter_)
 
             filenames = [str(filename) for filename in filenames]
             self.app.last_op_gerber_filter = _f
@@ -140,12 +140,12 @@ class appIO(QtCore.QObject):
                    "All Files (*.*)"
         if name is None:
             try:
-                filenames, _f = QtWidgets.QFileDialog.getOpenFileNames(caption=_("Open Excellon"),
+                filenames, _f = FCFileOpenDialog.getOpenFileNames(caption=_("Open Excellon"),
                                                                        directory=self.app.get_last_folder(),
                                                                        filter=_filter_,
                                                                        initialFilter=self.app.last_op_excellon_filter)
             except TypeError:
-                filenames, _f = QtWidgets.QFileDialog.getOpenFileNames(caption=_("Open Excellon"), filter=_filter_)
+                filenames, _f = FCFileOpenDialog.getOpenFileNames(caption=_("Open Excellon"), filter=_filter_)
             filenames = [str(filename) for filename in filenames]
             self.app.last_op_excellon_filter = _f
         else:
@@ -182,12 +182,12 @@ class appIO(QtCore.QObject):
 
         if name is None:
             try:
-                filenames, _f = QtWidgets.QFileDialog.getOpenFileNames(caption=_("Open G-Code"),
+                filenames, _f = FCFileOpenDialog.getOpenFileNames(caption=_("Open G-Code"),
                                                                        directory=self.app.get_last_folder(),
                                                                        filter=_filter_,
                                                                        initialFilter=self.app.last_op_gcode_filter)
             except TypeError:
-                filenames, _f = QtWidgets.QFileDialog.getOpenFileNames(caption=_("Open G-Code"), filter=_filter_)
+                filenames, _f = FCFileOpenDialog.getOpenFileNames(caption=_("Open G-Code"), filter=_filter_)
 
             filenames = [str(filename) for filename in filenames]
             self.app.last_op_gcode_filter = _f
@@ -218,10 +218,10 @@ class appIO(QtCore.QObject):
 
         _filter_ = "FlatCAM Project (*.FlatPrj);;All Files (*.*)"
         try:
-            filename, _f = QtWidgets.QFileDialog.getOpenFileName(caption=_("Open Project"),
+            filename, _f = FCFileOpenDialog.getOpenFileName(caption=_("Open Project"),
                                                                  directory=self.app.get_last_folder(), filter=_filter_)
         except TypeError:
-            filename, _f = QtWidgets.QFileDialog.getOpenFileName(caption=_("Open Project"), filter=_filter_)
+            filename, _f = FCFileOpenDialog.getOpenFileName(caption=_("Open Project"), filter=_filter_)
 
         filename = str(filename)
 
@@ -248,11 +248,11 @@ class appIO(QtCore.QObject):
 
         if name is None:
             try:
-                filenames, _f = QtWidgets.QFileDialog.getOpenFileNames(caption=_("Open HPGL2"),
+                filenames, _f = FCFileOpenDialog.getOpenFileNames(caption=_("Open HPGL2"),
                                                                        directory=self.app.get_last_folder(),
                                                                        filter=_filter_)
             except TypeError:
-                filenames, _f = QtWidgets.QFileDialog.getOpenFileNames(caption=_("Open HPGL2"), filter=_filter_)
+                filenames, _f = FCFileOpenDialog.getOpenFileNames(caption=_("Open HPGL2"), filter=_filter_)
 
             filenames = [str(filename) for filename in filenames]
         else:
@@ -282,10 +282,10 @@ class appIO(QtCore.QObject):
 
         _filter_ = "FlatCAM Config (*.FlatConfig);;FlatCAM Config (*.json);;All Files (*.*)"
         try:
-            filename, _f = QtWidgets.QFileDialog.getOpenFileName(caption=_("Open Configuration File"),
+            filename, _f = FCFileOpenDialog.getOpenFileName(caption=_("Open Configuration File"),
                                                                  directory=self.app.data_path, filter=_filter_)
         except TypeError:
-            filename, _f = QtWidgets.QFileDialog.getOpenFileName(caption=_("Open Configuration File"),
+            filename, _f = FCFileOpenDialog.getOpenFileName(caption=_("Open Configuration File"),
                                                                  filter=_filter_)
 
         if filename == "":
@@ -713,11 +713,11 @@ class appIO(QtCore.QObject):
 
         _filter_ = "SVG File .svg (*.svg);;All Files (*.*)"
         try:
-            filenames, _f = QtWidgets.QFileDialog.getOpenFileNames(caption=_("Import SVG"),
+            filenames, _f = FCFileOpenDialog.getOpenFileNames(caption=_("Import SVG"),
                                                                    directory=self.app.get_last_folder(),
                                                                    filter=_filter_)
         except TypeError:
-            filenames, _f = QtWidgets.QFileDialog.getOpenFileNames(caption=_("Import SVG"),
+            filenames, _f = FCFileOpenDialog.getOpenFileNames(caption=_("Import SVG"),
                                                                    filter=_filter_)
 
         if type_of_obj != "geometry" and type_of_obj != "gerber":
@@ -743,11 +743,11 @@ class appIO(QtCore.QObject):
 
         _filter_ = "DXF File .dxf (*.DXF);;All Files (*.*)"
         try:
-            filenames, _f = QtWidgets.QFileDialog.getOpenFileNames(caption=_("Import DXF"),
+            filenames, _f = FCFileOpenDialog.getOpenFileNames(caption=_("Import DXF"),
                                                                    directory=self.app.get_last_folder(),
                                                                    filter=_filter_)
         except TypeError:
-            filenames, _f = QtWidgets.QFileDialog.getOpenFileNames(caption=_("Import DXF"),
+            filenames, _f = FCFileOpenDialog.getOpenFileNames(caption=_("Import DXF"),
                                                                    filter=_filter_)
 
         if type_of_obj != "geometry" and type_of_obj != "gerber":
@@ -1001,10 +1001,10 @@ class appIO(QtCore.QObject):
             filenames = [name]
         else:
             try:
-                filenames, _f = QtWidgets.QFileDialog.getOpenFileNames(
+                filenames, _f = FCFileOpenDialog.getOpenFileNames(
                     caption=_("Open TCL script"), directory=self.app.get_last_folder(), filter=_filter_)
             except TypeError:
-                filenames, _f = QtWidgets.QFileDialog.getOpenFileNames(caption=_("Open TCL script"), filter=_filter_)
+                filenames, _f = FCFileOpenDialog.getOpenFileNames(caption=_("Open TCL script"), filter=_filter_)
 
         if len(filenames) == 0:
             if silent is False:
@@ -1038,10 +1038,10 @@ class appIO(QtCore.QObject):
             filenames = [name]
         else:
             try:
-                filenames, _f = QtWidgets.QFileDialog.getOpenFileNames(
+                filenames, _f = FCFileOpenDialog.getOpenFileNames(
                     caption=_("Open TCL script"), directory=example_path, filter=_filter_)
             except TypeError:
-                filenames, _f = QtWidgets.QFileDialog.getOpenFileNames(caption=_("Open TCL script"), filter=_filter_)
+                filenames, _f = FCFileOpenDialog.getOpenFileNames(caption=_("Open TCL script"), filter=_filter_)
 
         if len(filenames) == 0:
             if silent is False:
@@ -1076,11 +1076,11 @@ class appIO(QtCore.QObject):
             _filter_ = "TCL script .FlatScript (*.FlatScript);;TCL script .tcl (*.TCL);;TCL script .txt (*.TXT);;" \
                        "All Files (*.*)"
             try:
-                filename, _f = QtWidgets.QFileDialog.getOpenFileName(caption=_("Run TCL script"),
+                filename, _f = FCFileOpenDialog.getOpenFileName(caption=_("Run TCL script"),
                                                                      directory=self.app.get_last_folder(),
                                                                      filter=_filter_)
             except TypeError:
-                filename, _f = QtWidgets.QFileDialog.getOpenFileName(caption=_("Run TCL script"), filter=_filter_)
+                filename, _f = FCFileOpenDialog.getOpenFileName(caption=_("Run TCL script"), filter=_filter_)
 
         # The Qt methods above will return a QString which can cause problems later.
         # So far json.dump() will fail to serialize it.
@@ -1493,11 +1493,11 @@ class appIO(QtCore.QObject):
         # Show file chooser
         filter_ = "Config File (*.FlatConfig);;All Files (*.*)"
         try:
-            filename, _f = QtWidgets.QFileDialog.getOpenFileName(caption=_("Import FlatCAM Preferences"),
+            filename, _f = FCFileOpenDialog.getOpenFileName(caption=_("Import FlatCAM Preferences"),
                                                                  directory=self.app.data_path,
                                                                  filter=filter_)
         except TypeError:
-            filename, _f = QtWidgets.QFileDialog.getOpenFileName(caption=_("Import FlatCAM Preferences"),
+            filename, _f = FCFileOpenDialog.getOpenFileName(caption=_("Import FlatCAM Preferences"),
                                                                  filter=filter_)
         filename = str(filename)
         if filename == "":

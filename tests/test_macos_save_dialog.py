@@ -5,6 +5,7 @@ from pathlib import Path
 
 GUI_SOURCE = Path(__file__).parents[1] / "appGUI" / "GUIElements.py"
 CNC_SOURCE = Path(__file__).parents[1] / "appObjects" / "CNCJobObject.py"
+IO_SOURCE = Path(__file__).parents[1] / "appHandlers" / "appIO.py"
 
 
 def _method(source, name):
@@ -14,6 +15,17 @@ def _method(source, name):
 
 
 class MacOSSaveDialogTests(unittest.TestCase):
+    def test_open_dialog_uses_macos_chooser(self):
+        source = GUI_SOURCE.read_text()
+        self.assertIn("class FCFileOpenDialog", source)
+        self.assertIn("choose file with prompt", source)
+        self.assertIn("multiple selections allowed", source)
+
+    def test_file_open_handlers_use_open_dialog_wrapper(self):
+        source = IO_SOURCE.read_text()
+        self.assertIn("FCFileOpenDialog", source)
+        self.assertNotIn("QtWidgets.QFileDialog.getOpenFile", source)
+
     def test_cnc_job_keeps_save_dialog_import(self):
         source = CNC_SOURCE.read_text()
         self.assertIn("FCFileSaveDialog", source.split("\n", 40)[0:40].__str__())
