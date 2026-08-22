@@ -198,13 +198,12 @@ class EventSensitiveListView(QtWidgets.QTreeView):
             event.ignore()
 
 
-class TreeItem(EventSensitiveListView):
+class TreeItem:
     """
     Item of a tree model
     """
 
     def __init__(self, data, icon=None, obj=None, parent_item=None):
-        super(TreeItem, self).__init__(parent_item)
         self.parent_item = parent_item
         self.item_data = data  # Columns string data
         self.icon = icon  # Decoration
