@@ -18,7 +18,18 @@ def _event_sensitive_list_view_class():
                 and node.name == "EventSensitiveListView")
 
 
+def _tree_item_class():
+    tree = ast.parse(SOURCE.read_text())
+    return next(node for node in tree.body if isinstance(node, ast.ClassDef)
+                and node.name == "TreeItem")
+
+
 class TreeExpansionTests(unittest.TestCase):
+    def test_tree_items_are_data_objects_not_nested_qt_views(self):
+        class_node = _tree_item_class()
+        bases = [base.id for base in class_node.bases if isinstance(base, ast.Name)]
+        self.assertNotIn("EventSensitiveListView", bases)
+
     def test_project_tree_does_not_handle_external_file_drops(self):
         class_node = _event_sensitive_list_view_class()
         init_method = next(node for node in class_node.body
