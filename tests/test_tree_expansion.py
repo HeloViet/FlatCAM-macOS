@@ -4,6 +4,7 @@ from pathlib import Path
 
 
 SOURCE = Path(__file__).parents[1] / "appObjects" / "ObjectCollection.py"
+APP_SOURCE = Path(__file__).parents[1] / "appMain.py"
 
 
 def _object_collection_class():
@@ -25,6 +26,11 @@ def _tree_item_class():
 
 
 class TreeExpansionTests(unittest.TestCase):
+    def test_project_tab_has_manual_expand_all_button(self):
+        source = APP_SOURCE.read_text()
+        self.assertIn("expand_tree_button = FCButton", source)
+        self.assertIn("expand_tree_button.clicked.connect(self.collection.expand_all_groups)", source)
+
     def test_tree_items_are_data_objects_not_nested_qt_views(self):
         class_node = _tree_item_class()
         bases = [base.id for base in class_node.bases if isinstance(base, ast.Name)]

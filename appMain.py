@@ -903,6 +903,10 @@ class App(QtCore.QObject):
         # ###########################################################################################################
 
         self.collection = ObjectCollection(app=self)
+        expand_tree_button = FCButton(_('Expand All'))
+        expand_tree_button.setToolTip(_('Expand all project tree groups.'))
+        expand_tree_button.clicked.connect(self.collection.expand_all_groups)
+        self.ui.project_tab_layout.insertWidget(0, expand_tree_button)
         self.ui.project_tab_layout.addWidget(self.collection.view)
 
         self.app_obj = AppObject(app=self)
