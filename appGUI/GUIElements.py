@@ -22,6 +22,8 @@ import logging
 import html
 import sys
 import inspect
+import os
+import subprocess
 
 import gettext
 import appTranslation as fcTranslate
@@ -5575,9 +5577,31 @@ class FCFileSaveDialog(QtWidgets.QFileDialog):
 
     @staticmethod
     def get_saved_filename(parent=None, caption='', directory='', ext_filter='', initialFilter=''):
-        filename, _filter = QtWidgets.QFileDialog.getSaveFileName(parent=parent, caption=caption,
-                                                                  directory=directory, filter=ext_filter,
-                                                                  initialFilter=initialFilter)
+        if sys.platform == 'darwin':
+            default_name = os.path.basename(str(directory)) or 'untitled'
+
+            def applescript_string(value):
+                escaped = str(value).replace('\\', '\\\\').replace('"', '\\"')
+                return '"%s"' % escaped
+
+            script = (
+                'set chosenFile to choose file name with prompt %s default name %s\n'
+                'return POSIX path of chosenFile'
+            ) % (applescript_string(caption), applescript_string(default_name))
+            result = subprocess.run(
+                ['osascript', '-e', script],
+                capture_output=True,
+                text=True,
+                check=False
+            )
+            if result.returncode != 0:
+                return '', ext_filter
+            filename = result.stdout.strip()
+            _filter = ext_filter
+        else:
+            filename, _filter = QtWidgets.QFileDialog.getSaveFileName(
+                parent=parent, caption=caption, directory=directory,
+                filter=ext_filter, initialFilter=initialFilter)
 
         filename = str(filename)
         if filename == '':
