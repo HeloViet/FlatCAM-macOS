@@ -2033,18 +2033,33 @@ class ToolMilling(Excellon, AppTool):
         return [str(x.text()) for x in self.ui.tools_table_mill_exc.selectedItems()]
 
     def on_apply_param_to_all_clicked(self):
-        if self.ui.tools_table_mill_exc.rowCount() == 0:
+        table = self.ui.tools_table_mill_exc
+        row_count = table.rowCount() - 2
+        if row_count <= 0:
             # there is no tool in tool table so, we can't save the GUI elements values to storage
             self.app.log.debug("ToolDrilling.on_apply_param_to_all_clicked() --> no tool in Tools Table, aborting.")
             return
 
+        row = table.currentRow()
+        if row < 0 or row >= row_count or table.item(row, 3) is None:
+            row = next(
+                (candidate for candidate in range(row_count)
+                 if table.item(candidate, 3) is not None
+                 and table.item(candidate, 3).text().strip()),
+                None
+            )
+        if row is None:
+            self.app.log.warning("ToolMilling.on_apply_param_to_all_clicked() --> no valid tool row found.")
+            return
+
+        tooluid_item = table.item(row, 3)
+        if tooluid_item is None or not tooluid_item.text().strip():
+            self.app.log.warning("ToolMilling.on_apply_param_to_all_clicked() --> tool UID is empty.")
+            return
+
         self.ui_disconnect()
 
-        row = self.ui.tools_table_mill_exc.currentRow()
-        if row < 0:
-            row = 0
-
-        tooluid_item = int(self.ui.tools_table_mill_exc.item(row, 3).text())
+        tooluid_item = int(tooluid_item.text())
         temp_tool_data = {}
 
         for tooluid_key, tooluid_val in self.target_obj.tools.items():
@@ -2053,6 +2068,11 @@ class ToolMilling(Excellon, AppTool):
                 # the current row in the tool table
                 temp_tool_data = tooluid_val['data']
                 break
+
+        if not temp_tool_data:
+            self.app.log.warning("ToolMilling.on_apply_param_to_all_clicked() --> tool UID not found.")
+            self.ui_connect()
+            return
 
         for tooluid_key, tooluid_val in self.target_obj.tools.items():
             tooluid_val['data'] = deepcopy(temp_tool_data)
