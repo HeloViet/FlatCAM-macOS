@@ -1,0 +1,4 @@
+#!/bin/sh
+
+export QT_ACCESSIBILITY=0
+exec /opt/homebrew/bin/flatcam "$@"

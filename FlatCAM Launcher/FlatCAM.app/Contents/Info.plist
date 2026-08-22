@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDisplayName</key>
+	<string>FlatCAM</string>
+	<key>CFBundleExecutable</key>
+	<string>FlatCAMLauncher</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.heloviet.flatcam</string>
+	<key>CFBundleName</key>
+	<string>FlatCAM</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>8.9.95</string>
+	<key>CFBundleVersion</key>
+	<string>8.9.95</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>11.0</string>
+</dict>
+</plist>
