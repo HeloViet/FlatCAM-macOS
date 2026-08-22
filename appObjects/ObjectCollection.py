@@ -58,8 +58,10 @@ class EventSensitiveListView(QtWidgets.QTreeView):
         # self.setExpandsOnDoubleClick(False)
         self.setEditTriggers(QtWidgets.QTreeView.EditTrigger.NoEditTriggers)    # No edit in the Project Tab Tree
 
-        # Enable dragging and dropping onto the appGUI
-        self.setAcceptDrops(True)
+        # Let MainGUI handle external file drops.  On macOS, handling a drop
+        # directly in this expanded QTreeView can crash Qt's accessibility
+        # cache while the imported object is inserted into the model.
+        self.setAcceptDrops(False)
         self.filename = ""
         self.app = app
 
