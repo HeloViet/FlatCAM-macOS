@@ -5,6 +5,7 @@ from pathlib import Path
 
 GUI_SOURCE = Path(__file__).parents[1] / "appGUI" / "GUIElements.py"
 CNC_SOURCE = Path(__file__).parents[1] / "appObjects" / "CNCJobObject.py"
+LAUNCHER_SOURCE = Path(__file__).parents[1] / "flatcam.py"
 
 
 def _method(source, name):
@@ -14,6 +15,11 @@ def _method(source, name):
 
 
 class MacOSSaveDialogTests(unittest.TestCase):
+    def test_launcher_disables_qt_accessibility_bridge(self):
+        source = LAUNCHER_SOURCE.read_text()
+        self.assertIn("QAccessible9setActiveEb", source)
+        self.assertIn("set_active(False)", source)
+
     def test_cnc_job_keeps_save_dialog_import(self):
         source = CNC_SOURCE.read_text()
         self.assertIn("FCFileSaveDialog", source.split("\n", 40)[0:40].__str__())
