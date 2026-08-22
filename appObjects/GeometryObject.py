@@ -73,7 +73,7 @@ class GeometryObject(FlatCAMObj, Geometry):
             "tools_mill_feedrate": 5.0,
             "tools_mill_feedrate_z": 5.0,
             "tools_mill_feedrate_rapid": 5.0,
-            "tools_mill_spindlespeed": 0,
+            "tools_mill_spindlespeed": 500,
             "tools_mill_dwell": True,
             "tools_mill_dwelltime": 1000,
             "tools_mill_multidepth": False,

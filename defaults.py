@@ -415,7 +415,7 @@ class AppDefaults:
         "tools_drill_endxy": None,
 
         "tools_drill_feedrate_z": 300,
-        "tools_drill_spindlespeed": 0,
+        "tools_drill_spindlespeed": 500,
         "tools_drill_dwell": False,
         "tools_drill_dwelltime": 1,
         # Laser parameters
@@ -472,7 +472,7 @@ class AppDefaults:
         "tools_mill_min_power": 0.0,
         "tools_mill_laser_on": "M3",
 
-        "tools_mill_spindlespeed": 0,
+        "tools_mill_spindlespeed": 500,
         "tools_mill_dwell": False,
         "tools_mill_dwelltime": 1,
         "tools_mill_preprocessor_list": ['default'],

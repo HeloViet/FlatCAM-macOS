@@ -446,6 +446,9 @@ class ToolMilling(Excellon, AppTool):
         self.units = self.app.app_units.upper()
         self.old_tool_dia = self.app.options["tools_iso_newdia"]
 
+        if self.app.options.get('tools_mill_spindlespeed', 0) in (None, 0):
+            self.app.options['tools_mill_spindlespeed'] = 500
+
         self.obj_name = ""
         self.target_obj = None
 
@@ -1006,6 +1009,11 @@ class ToolMilling(Excellon, AppTool):
         else:
             tools_dict = {}
 
+        for tooluid_value in tools_dict.values():
+            tool_data = tooluid_value.setdefault('data', {})
+            if tool_data.get('tools_mill_spindlespeed', 0) in (None, 0):
+                tool_data['tools_mill_spindlespeed'] = 500
+
         row_idx = 0
 
         n = len(tools_dict)
@@ -1151,6 +1159,11 @@ class ToolMilling(Excellon, AppTool):
 
         else:
             tools = []
+
+        for tooluid_value in self.target_obj.tools.values() if self.target_obj else []:
+            tool_data = tooluid_value.setdefault('data', {})
+            if tool_data.get('tools_mill_spindlespeed', 0) in (None, 0):
+                tool_data['tools_mill_spindlespeed'] = 500
 
         n = len(tools)
         # we have (n+2) rows because there are 'n' tools, each a row, plus the last 2 rows for totals.
