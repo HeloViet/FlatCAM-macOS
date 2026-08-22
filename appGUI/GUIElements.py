@@ -5607,9 +5607,13 @@ class FCFileSaveDialog(QtWidgets.QFileDialog):
         if filename == '':
             return filename, _filter
 
-        extension = '.' + _filter.strip(')').rpartition('.')[2]
+        extension_match = re.search(r'\*\.([A-Za-z0-9]+)', _filter)
+        if extension_match:
+            extension = '.' + extension_match.group(1)
+        else:
+            extension = ''
 
-        if filename.endswith(extension) or extension == '.*':
+        if not extension or filename.lower().endswith(extension.lower()):
             return filename, _filter
         else:
             filename += extension

@@ -43,6 +43,18 @@ class MacOSSaveDialogTests(unittest.TestCase):
                         and node.func.attr == "get_saved_filename"]
         self.assertTrue(dialog_calls)
 
+    def test_export_uses_timestamped_nc_default_name(self):
+        method = _method(CNC_SOURCE, "on_exportgcode_button_click")
+        source = ast.unparse(method)
+        self.assertIn("strftime('%Y%m%d_%H%M%S')", source)
+        self.assertIn("default_extension = '.nc'", source)
+
+    def test_save_dialog_extracts_extension_from_first_wildcard(self):
+        method = _method(GUI_SOURCE, "get_saved_filename")
+        source = ast.unparse(method)
+        self.assertIn("re.search", source)
+        self.assertIn("extension = '.' + extension_match.group(1)", source)
+
 
 if __name__ == "__main__":
     unittest.main()
