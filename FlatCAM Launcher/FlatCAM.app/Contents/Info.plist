@@ -6,6 +6,8 @@
 	<string>FlatCAM</string>
 	<key>CFBundleExecutable</key>
 	<string>FlatCAMLauncher</string>
+	<key>CFBundleIconFile</key>
+	<string>FlatCAM.png</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.heloviet.flatcam</string>
 	<key>CFBundleName</key>
