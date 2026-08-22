@@ -9,7 +9,7 @@ from PyQt6 import QtWidgets, QtCore, QtGui
 from appTool import AppTool
 from appGUI.GUIElements import VerticalScrollArea, FCLabel, FCButton, FCFrame, GLay, FCComboBox, FCCheckBox, \
     FCComboBox2, RadioSet, FCDoubleSpinner, FCSpinner, FCInputDialogSpinnerButton, FCTable, \
-    OptionalInputSection
+    OptionalInputSection, FCFileSaveDialog
 
 import logging
 from copy import deepcopy
@@ -40,6 +40,7 @@ log = logging.getLogger('base')
 
 class ToolIsolation(Gerber, AppTool):
     optimal_found_sig = QtCore.pyqtSignal(float)
+    geometry_ready = QtCore.pyqtSignal(object)
 
     def __init__(self, app):
         self.app = app
@@ -113,6 +114,8 @@ class ToolIsolation(Gerber, AppTool):
 
         # store here the validation status (if tool validation is used)
         self.validation_status = True
+        self._quick_workflow = False
+        self.geometry_ready.connect(self._on_quick_geometry_ready)
 
         # disconnect flags
         self.area_sel_disconnect_flag = False
@@ -1679,9 +1682,72 @@ class ToolIsolation(Gerber, AppTool):
 
         def worker_task(iso_class):
             with iso_class.app.proc_container.new('%s ...' % _("Isolating")):
-                iso_class.isolate_handler(iso_class.grb_obj)
+                try:
+                    result = iso_class.isolate_handler(iso_class.grb_obj)
+                    if result == 'fail':
+                        iso_class._quick_workflow = False
+                except Exception:
+                    iso_class._quick_workflow = False
+                    raise
 
         self.app.worker_task.emit({'fcn': worker_task, 'params': [self]})
+
+    def quick_isolation_dxf(self):
+        """Run a one-tool isolation and export the resulting geometry as DXF."""
+        selected_obj = self.app.collection.get_active()
+        if selected_obj is None or selected_obj.kind != 'gerber':
+            self.app.inform.emit('[WARNING_NOTCL] %s' % _('No Gerber object is selected.'))
+            return
+
+        self._quick_workflow = True
+        self.grb_obj = selected_obj
+        self.obj_name = selected_obj.obj_options['name']
+
+        self.ui.object_combo.set_value(self.obj_name)
+        self.ui.select_combo.set_value(0)
+        self.ui.valid_cb.set_value(False)
+
+        # Use exactly one known tool for this shortcut, without changing saved defaults.
+        self.iso_tools.clear()
+        self.on_tool_default_add(dia=0.01, muted=True)
+        self.ui.tools_table.selectAll()
+        self.on_iso_button_click()
+
+    def _quick_geometry_created(self, geometry_name):
+        if self._quick_workflow:
+            self.geometry_ready.emit(geometry_name)
+
+    def _on_quick_geometry_ready(self, geometry_name):
+        if not self._quick_workflow:
+            return
+        self._quick_workflow = False
+
+        geometry_obj = self.app.collection.get_by_name(geometry_name)
+        if geometry_obj is None or geometry_obj.kind != 'geometry':
+            self.app.inform.emit('[ERROR_NOTCL] %s' % _('Isolation Geometry was not found.'))
+            return
+
+        name = geometry_obj.obj_options['name']
+        _filter_ = 'DXF File .dxf (*.DXF);;All Files (*.*)'
+        filename, _f = FCFileSaveDialog.get_saved_filename(
+            caption=_('Export DXF'),
+            directory=self.app.get_last_save_folder() + '/' + name,
+            ext_filter=_filter_)
+
+        if filename == '':
+            self.app.inform.emit('[WARNING_NOTCL] %s' % _('Cancelled.'))
+            return
+
+        self.app.f_handlers.export_dxf(name, filename)
+        self.app.file_saved.emit('DXF', filename)
+
+    def _new_isolation_geometry(self, iso_name, iso_init, plot=True, autoselected=True):
+        callback = self._quick_geometry_created if self._quick_workflow else None
+        callback_params = [iso_name] if callback is not None else None
+        return self.app.app_obj.new_object(
+            'geometry', iso_name, iso_init, plot=plot,
+            autoselected=autoselected,
+            callback=callback, callback_params=callback_params)
 
     def isolate_handler(self, isolated_obj):
         """
@@ -1966,7 +2032,7 @@ class ToolIsolation(Gerber, AppTool):
                         geo_obj.multigeo = True
 
                     a_select = True if self.validation_status else False
-                    self.app.app_obj.new_object("geometry", iso_name, iso_init, plot=plot, autoselected=a_select)
+                    self._new_isolation_geometry(iso_name, iso_init, plot=plot, autoselected=a_select)
 
             # clean the progressive plotted shapes if it was used
 
@@ -2179,7 +2245,7 @@ class ToolIsolation(Gerber, AppTool):
                     app_obj.inform.emit(mssg)
 
         a_select = True if self.validation_status else False
-        self.app.app_obj.new_object("geometry", iso_name, iso_init, plot=plot, autoselected=a_select)
+        self._new_isolation_geometry(iso_name, iso_init, plot=plot, autoselected=a_select)
 
         # the tools are finished but the isolation is not finished therefore it failed
         if work_geo:
@@ -2405,7 +2471,7 @@ class ToolIsolation(Gerber, AppTool):
                     app_obj.inform.emit(msg)
 
         a_select = True if self.validation_status else False
-        self.app.app_obj.new_object("geometry", iso_name, iso_init, plot=plot, autoselected=a_select)
+        self._new_isolation_geometry(iso_name, iso_init, plot=plot, autoselected=a_select)
 
     def area_subtraction(self, geo, subtraction_geo=None):
         """

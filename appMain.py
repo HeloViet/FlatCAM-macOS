@@ -903,10 +903,16 @@ class App(QtCore.QObject):
         # ###########################################################################################################
 
         self.collection = ObjectCollection(app=self)
+        project_actions = QtWidgets.QHBoxLayout()
         expand_tree_button = FCButton(_('Expand All'))
         expand_tree_button.setToolTip(_('Expand all project tree groups.'))
         expand_tree_button.clicked.connect(self.collection.expand_all_groups)
-        self.ui.project_tab_layout.insertWidget(0, expand_tree_button)
+        project_actions.addWidget(expand_tree_button)
+        quick_isolation_button = FCButton(_('Quick Isolation DXF'))
+        quick_isolation_button.setToolTip(_('Isolate the selected Gerber with a 0.01 tool and export it as DXF.'))
+        quick_isolation_button.clicked.connect(lambda: self.isolation_tool.quick_isolation_dxf())
+        project_actions.addWidget(quick_isolation_button)
+        self.ui.project_tab_layout.insertLayout(0, project_actions)
         self.ui.project_tab_layout.addWidget(self.collection.view)
 
         self.app_obj = AppObject(app=self)
