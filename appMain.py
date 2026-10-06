@@ -7557,6 +7557,32 @@ class App(QtCore.QObject):
         self.disable_plots(objects=object_list)
         self.inform.emit('[success] %s' % _("Selected plots disabled..."))
 
+    def _ensure_object_plot_ui(self, obj):
+        """Ensure that an object still owns a live plot checkbox widget."""
+        try:
+            obj.ui.plot_cb.isEnabled()
+            return True
+        except (AttributeError, RuntimeError):
+            try:
+                obj.set_ui(obj.ui_type(app=self))
+                obj.build_ui()
+                obj.ui.plot_cb.isEnabled()
+                return True
+            except Exception as err:
+                self.log.error("Could not rebuild plot UI for %s: %s" %
+                               (getattr(obj, 'obj_options', {}).get('name', '<unknown>'), str(err)))
+                return False
+
+    def toggle_object_plot(self, obj):
+        """Toggle an object's plot checkbox while recovering stale Qt widgets."""
+        if not self._ensure_object_plot_ui(obj):
+            return
+        try:
+            obj.ui.plot_cb.toggle()
+        except (AttributeError, RuntimeError):
+            if self._ensure_object_plot_ui(obj):
+                obj.ui.plot_cb.toggle()
+
     def enable_plots(self, objects, silent=False):
         """
         Enable plots
@@ -7571,6 +7597,8 @@ class App(QtCore.QObject):
 
         for obj in objects:
             if obj.obj_options['plot'] is False:
+                if not self._ensure_object_plot_ui(obj):
+                    continue
                 obj.obj_options.set_change_callback(lambda x: None)
                 try:
                     obj.obj_options['plot'] = True
@@ -7578,21 +7606,18 @@ class App(QtCore.QObject):
                     # disable this cb while disconnected,
                     # in case the operation takes time the user is not allowed to change it
                     obj.ui.plot_cb.setDisabled(True)
-                except AttributeError:
-                    # try to build the ui
-                    obj.build_ui()
-                    # and try again
-                    self.enable_plots(objects)
+                except (AttributeError, RuntimeError, TypeError):
+                    pass
 
                 obj.set_form_item("plot")
                 try:
                     obj.ui.plot_cb.stateChanged.connect(obj.on_plot_cb_click)
                     obj.ui.plot_cb.setDisabled(False)
-                except AttributeError:
-                    # try to build the ui
-                    obj.build_ui()
-                    # and try again
-                    self.enable_plots(objects)
+                except (AttributeError, RuntimeError, TypeError):
+                    if self._ensure_object_plot_ui(obj):
+                        obj.set_form_item("plot")
+                        obj.ui.plot_cb.stateChanged.connect(obj.on_plot_cb_click)
+                        obj.ui.plot_cb.setDisabled(False)
                 obj.obj_options.set_change_callback(obj.on_options_change)
         self.collection.update_view()
 
@@ -7620,26 +7645,25 @@ class App(QtCore.QObject):
 
         for obj in objects:
             if obj.obj_options['plot'] is True:
+                if not self._ensure_object_plot_ui(obj):
+                    continue
                 obj.obj_options.set_change_callback(lambda x: None)
                 try:
                     obj.obj_options['plot'] = False
                     obj.ui.plot_cb.stateChanged.disconnect(obj.on_plot_cb_click)
                     obj.ui.plot_cb.setDisabled(True)
-                except (AttributeError, TypeError):
-                    # try to build the ui
-                    obj.build_ui()
-                    # and try again
-                    self.disable_plots(objects)
+                except (AttributeError, RuntimeError, TypeError):
+                    pass
 
                 obj.set_form_item("plot")
                 try:
                     obj.ui.plot_cb.stateChanged.connect(obj.on_plot_cb_click)
                     obj.ui.plot_cb.setDisabled(False)
-                except (AttributeError, TypeError):
-                    # try to build the ui
-                    obj.build_ui()
-                    # and try again
-                    self.disable_plots(objects)
+                except (AttributeError, RuntimeError, TypeError):
+                    if self._ensure_object_plot_ui(obj):
+                        obj.set_form_item("plot")
+                        obj.ui.plot_cb.stateChanged.connect(obj.on_plot_cb_click)
+                        obj.ui.plot_cb.setDisabled(False)
                 obj.obj_options.set_change_callback(obj.on_options_change)
 
         try:

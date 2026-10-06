@@ -3349,7 +3349,7 @@ class MainGUI(QtWidgets.QMainWindow):
                 # Space = Toggle Active/Inactive
                 if key == QtCore.Qt.Key.Key_Space:
                     for select in selected:
-                        select.ui.plot_cb.toggle()
+                        self.app.toggle_object_plot(select)
                         QtWidgets.QApplication.processEvents()
                     self.app.collection.update_view()
                     self.app.delete_selection_shape()
