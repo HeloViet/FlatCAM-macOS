@@ -19,7 +19,9 @@ class PlotToggleSafetyTests(unittest.TestCase):
     def test_space_toggle_uses_safe_app_helper(self):
         space_block = MAIN_GUI_SOURCE.split("# Space = Toggle Active/Inactive", 1)[1].split(
             "# Select the object in the Tree above the current one", 1)[0]
-        self.assertIn("toggle_object_plot", space_block)
+        self.assertIn("len(selected) != 1", space_block)
+        self.assertIn("enable_plots", space_block)
+        self.assertIn("disable_plots", space_block)
 
 
 if __name__ == "__main__":

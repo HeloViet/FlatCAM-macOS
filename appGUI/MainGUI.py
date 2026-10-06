@@ -3348,9 +3348,15 @@ class MainGUI(QtWidgets.QMainWindow):
 
                 # Space = Toggle Active/Inactive
                 if key == QtCore.Qt.Key.Key_Space:
-                    for select in selected:
-                        self.app.toggle_object_plot(select)
-                        QtWidgets.QApplication.processEvents()
+                    if len(selected) != 1 or selected[0] is None:
+                        return
+
+                    selected_obj = selected[0]
+                    if selected_obj.obj_options['plot'] is False:
+                        self.app.enable_plots([selected_obj], silent=True)
+                    else:
+                        self.app.disable_plots([selected_obj])
+                    QtWidgets.QApplication.processEvents()
                     self.app.collection.update_view()
                     self.app.delete_selection_shape()
 
